@@ -1,1 +1,84 @@
 <!DOCTYPE html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Dosis:400,700" rel="stylesheet" type="text/css" />
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <title>SINGAPORE 24-HOUR PSI</title>
+
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid black;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: rgb(0, 166, 255);
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 align=center>SINGAPORE 24-HOUR PSI</h2>
+    <div class="main-body">
+        <table class="table table-bordered table-striped table-hover centered responsive-table display" id="table">
+            <thread>
+                <tr>
+                    <th>Metric:</th>
+                    <th>National:</th>
+                    <th>Central:</th>
+                    <th>West:</th>
+                    <th>East:</th>
+                    <th>North:</th>
+                    <th>South:</th>
+                </tr>
+            </thread>
+        </table>
+    </div>
+
+    <script>
+        async function getPSI() {
+            try {
+                let response = await fetch('https://api.data.gov.sg/v1/environment/psi');
+                return await response.json();
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        async function displayPSI() {
+            let retrievedPSIData = await getPSI();
+
+            updateTimestamp = retrievedPSIData.items[0].update_timestamp;
+            datetime = new Date(updateTimestamp);
+            $("#lastUpdated").text("Last Updated: " + datetime);
+
+            keys = Object.keys(retrievedPSIData.items[0].readings);
+            PSIData = retrievedPSIData.items[0].readings;
+            $tbody = $('#table').find('tbody');
+
+            keys.forEach(key => {
+                $tbody.append("<tr><td>" + key + "</td><td>" + PSIData[key].national +
+                    "</td><td>" + PSIData[key].central + "</td><td>" + PSIData[key].west +
+                    "</td><td>" + PSIData[key].east + "</td><td>" + PSIData[key].north +
+                    "</td><td>" + PSIData[key].south + "</td></tr>");
+            });
+        }
+        displayPSI();
+
+    </script>
+</body>
